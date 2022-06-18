@@ -3,12 +3,14 @@ import 'dart:async';
 import 'package:ecommerce_flutter/consts/app_config.dart';
 import 'package:ecommerce_flutter/consts/app_styles.dart';
 import 'package:ecommerce_flutter/helper/sharedPref_helper.dart';
+import 'package:ecommerce_flutter/view/onboarding_screen/onboarding_page.dart';
 import 'package:ecommerce_flutter/view/screens/auth/login/login_screen.dart';
 import 'package:ecommerce_flutter/view/screens/dashboard/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_animations/simple_animations.dart';
 
 import '../../../consts/app_assets.dart';
+import '../../../helper/navigator_to/starting_page.dart';
 
 
 class SplashScreen extends StatefulWidget {
@@ -24,8 +26,9 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     // TODO: implement initState
     isLogin.load();
+    isFirstTime.load();
     Timer(const Duration(seconds: 3), ((){
-      callNextPage();
+      StartingPage().callNextPage(context);
     }));
     super.initState();
   }
@@ -75,11 +78,11 @@ class _SplashScreenState extends State<SplashScreen> {
               child: Center(
                 child: RichText(text: TextSpan(text: 'Ecommerce ',
                     style: textStyleNormal.copyWith(
-                        color: AppConfig.primaryColor),
+                        color: primaryColor),
                     children: [
                       TextSpan(text: 'Final ',
                         style: textStyleNormal.copyWith(
-                            color: AppConfig.accentColor),),
+                            color: accentColor),),
                       TextSpan(text: 'Project')
                     ])),
               ),
@@ -90,15 +93,4 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 
-  callNextPage() {
-    if (isLogin.$) {
-      Navigator.pushAndRemoveUntil(
-          context, MaterialPageRoute(builder: (_) => const DashboardScreen()), (
-          route) => false);
-    } else {
-      Navigator.pushAndRemoveUntil(
-          context, MaterialPageRoute(builder: (_) => const LoginScreen()), (
-          route) => false);
-    }
-  }
 }

@@ -1,6 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:ecommerce_flutter/consts/app_config.dart';
 import 'package:ecommerce_flutter/consts/app_styles.dart';
+import 'package:ecommerce_flutter/providers/auth/login_provider.dart';
+import 'package:ecommerce_flutter/providers/auth/register_provider.dart';
 import 'package:ecommerce_flutter/providers/language_provider/language_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -28,8 +30,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
 
     localLanguage.load();
-    return ChangeNotifierProvider(
-      create: (context) => LanguageProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => LanguageProvider(),),
+        ChangeNotifierProvider(create: (context) => LoginProvider(),),
+        ChangeNotifierProvider(create: (context) => RegisterProvider(),),
+      ],
+
       child: MaterialApp(
           localizationsDelegates: context.localizationDelegates,
           supportedLocales: context.supportedLocales,
@@ -37,7 +44,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
               primarySwatch: primaryColorPalette,
               primaryColor: primaryColor),
-          home: const CounterScreen()),
+          home: const SplashScreen()),
     );
   }
 }

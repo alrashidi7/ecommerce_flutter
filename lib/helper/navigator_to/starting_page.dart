@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 class StartingPage {
 
   callNextPage(BuildContext context) {
-    if (!isFirstTime.$) {
+    if (isFirstTime.$) {
       Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_)=>OnBoardingPage()), (route) => false);
     }else{
       if (isLogin.$) {

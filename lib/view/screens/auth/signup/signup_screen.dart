@@ -1,14 +1,19 @@
 import 'package:ecommerce_flutter/consts/app_assets.dart';
+import 'package:ecommerce_flutter/providers/auth/register_provider.dart';
 import 'package:ecommerce_flutter/view/screens/auth/login/login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../consts/app_config.dart';
 import '../../../../consts/app_styles.dart';
+import '../../../widgets/buttons/global_button.dart';
+import '../../../widgets/snack_bar.dart';
 import '../../../widgets/textField/text_field_widget.dart';
 
 class SignupScreen extends StatefulWidget {
-  bool hasPreviousPage ;
-  SignupScreen({Key? key,required this.hasPreviousPage}) : super(key: key);
+  bool hasPreviousPage;
+
+  SignupScreen({Key? key, required this.hasPreviousPage}) : super(key: key);
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
@@ -20,12 +25,16 @@ class _SignupScreenState extends State<SignupScreen> {
   TextEditingController nameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   final formGlobalKey = GlobalKey<FormState>();
+  GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+    RegisterProvider registerProvider = Provider.of<RegisterProvider>(context);
+
     return Scaffold(
       backgroundColor: backgroundScaffold,
+      key: scaffoldKey,
       body: SafeArea(
         child: Center(
           child: Container(
@@ -45,23 +54,40 @@ class _SignupScreenState extends State<SignupScreen> {
                       fontSize: 35,
                       fontWeight: FontWeight.w900),
                 ),
-                _registerForm(size),
+                registerProvider.state == RegisterState.error
+                    ? Center(
+                        child: Text(
+                          registerProvider.registerResoponse,
+                          style: textStyleNormal,
+                        ),
+                      )
+                    : _registerForm(size, registerProvider),
                 SizedBox(
                   height: AppConfig.mediumDimensions,
                 ),
                 GestureDetector(
-                  onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (_)=> LoginScreen(hasPreviousPage: true,)));
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => LoginScreen(
+                                  hasPreviousPage: true,
+                                )));
                   },
                   child: Container(
                     width: size.width,
                     alignment: Alignment.center,
-                    child: RichText(text: TextSpan(
-                        text: 'you already have account?! ',
-                        style: textStyleNormal,
-                        children: [
-                          TextSpan(text: 'Login',
-                            style: textStyleNormal.copyWith(color: accentColor,decoration: TextDecoration.underline),)
+                    child: RichText(
+                        text: TextSpan(
+                            text: 'you already have account?! ',
+                            style: textStyleNormal,
+                            children: [
+                          TextSpan(
+                            text: 'Login',
+                            style: textStyleNormal.copyWith(
+                                color: accentColor,
+                                decoration: TextDecoration.underline),
+                          )
                         ])),
                   ),
                 ),
@@ -85,14 +111,21 @@ class _SignupScreenState extends State<SignupScreen> {
           height: size.height * 0.3,
           fit: BoxFit.fitHeight,
         ),
-        widget.hasPreviousPage?IconButton(onPressed: (){
-          Navigator.pop(context);
-        }, icon: Icon(Icons.arrow_back,size: 30,)):SizedBox()
+        widget.hasPreviousPage
+            ? IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: Icon(
+                  Icons.arrow_back,
+                  size: 30,
+                ))
+            : SizedBox()
       ],
     );
   }
 
-  Widget _registerForm(Size size) {
+  Widget _registerForm(Size size, RegisterProvider registerProvider) {
     return Form(
         key: formGlobalKey,
         child: Column(
@@ -127,36 +160,29 @@ class _SignupScreenState extends State<SignupScreen> {
                 size: size,
                 hint: 'Password',
                 iconData: Icons.lock_open_outlined),
-
             SizedBox(
               height: AppConfig.veryLargeDimensions,
             ),
-            GestureDetector(
-              onTap: () {
-                register();
-              },
-              child: Container(
-                width: size.width * 0.9,
-                height: size.height * 0.07,
-                decoration: BoxDecoration(
-                    color: primaryColor,
-                    borderRadius:
-                    BorderRadius.circular(AppConfig.largeDimensions)),
-                child: Center(
-                  child: Text('Register',
-                      style: textStyleNormal.copyWith(color: accentColor,fontSize: 20)),
-                ),
-              ),
-            )
+            registerProvider.state == RegisterState.loading
+                ? const Center(child: CircularProgressIndicator())
+                : GlobalButton(
+                    backgroundBtnColor: primaryColor,
+                    btnTextColor: accentColor,
+                    buttonText: 'Register',
+                    onPressed: () {
+                      register(registerProvider,context);
+                    },
+                  ),
           ],
         ));
   }
 
-  register(){
+  register(RegisterProvider registerProvider,BuildContext context) {
     if (formGlobalKey.currentState!.validate()) {
-      // todo register
-    }else{
-
+      registerProvider.register(emailController.text, passwordController.text,
+          phoneController.text, nameController.text,context);
+    } else {
+      showInSnackBar(scaffoldKey, 'Please Enter a valid data', true);
     }
   }
 }

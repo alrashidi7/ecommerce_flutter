@@ -2,7 +2,7 @@ import 'dart:ui';
 
 class AppConfig{
   //api_config
-  static const String DOMAIN_PATH = "https://hatweb.stackdeans.com"; //localhost
+  static const String DOMAIN_PATH = "https://threhat.com"; //localhost
   static const String API_ENDPATH = "api/v2";
   static const String BASE_URL = "${DOMAIN_PATH}/${API_ENDPATH}";
 

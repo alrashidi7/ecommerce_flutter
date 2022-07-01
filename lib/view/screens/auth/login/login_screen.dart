@@ -1,73 +1,89 @@
 import 'package:ecommerce_flutter/consts/app_assets.dart';
 import 'package:ecommerce_flutter/consts/app_config.dart';
+import 'package:ecommerce_flutter/data/auth_api/login_api.dart';
+import 'package:ecommerce_flutter/models/auth/login_model.dart';
+import 'package:ecommerce_flutter/providers/auth/login_provider.dart';
 import 'package:ecommerce_flutter/view/screens/auth/signup/signup_screen.dart';
 import 'package:ecommerce_flutter/view/screens/dashboard/dashboard_screen.dart';
 import 'package:ecommerce_flutter/view/widgets/buttons/global_button.dart';
+import 'package:ecommerce_flutter/view/widgets/snack_bar.dart';
 import 'package:ecommerce_flutter/view/widgets/textField/text_field_widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../consts/app_styles.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends StatelessWidget {
   bool hasPreviousPage;
 
   LoginScreen({Key? key, required this.hasPreviousPage}) : super(key: key);
 
-  @override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   final formGlobalKey = GlobalKey<FormState>();
+  final scaffoldKey = GlobalKey<ScaffoldState>();
+  Future<LoginModel>? loginResponse;
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery
-        .of(context)
-        .size;
+    LoginProvider loginProvider = Provider.of<LoginProvider>(context);
+    Size size = MediaQuery.of(context).size;
+
     return Scaffold(
+      key: scaffoldKey,
       backgroundColor: backgroundScaffold,
       body: SafeArea(
         child: Center(
           child: Container(
             width: size.width * 0.9,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _imageHeader(size),
-                SizedBox(
-                  height: AppConfig.mediumDimensions,
-                ),
-                Text(
-                  'Login',
-                  style: textStyleNormal.copyWith(
-                      color: primaryColor,
-                      fontSize: 35,
-                      fontWeight: FontWeight.w900),
-                ),
-                _loginForm(size),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(
-                        builder: (_) => SignupScreen(hasPreviousPage: true,)));
-                  },
-                  child: Container(
-                    width: size.width,
-                    alignment: Alignment.center,
-                    child: RichText(text: TextSpan(
-                        text: 'you do not have account?!',
-                        style: textStyleNormal,
-                        children: [
-                          TextSpan(text: ' Register',
-                            style: textStyleNormal.copyWith(color: accentColor,
-                                decoration: TextDecoration.underline),)
-                        ])),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _imageHeader(size, context),
+                  const SizedBox(
+                    height: AppConfig.mediumDimensions,
                   ),
-                )
-              ],
+                  Text(
+                    'Login',
+                    style: textStyleNormal.copyWith(
+                        color: primaryColor,
+                        fontSize: 35,
+                        fontWeight: FontWeight.w900),
+                  ),
+                  // value.isLoading? Center(child: CircularProgressIndicator()) :
+
+                   _loginForm(size, loginProvider, context),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => SignupScreen(
+                                    hasPreviousPage: true,
+                                  )));
+                    },
+                    child: Container(
+                      width: size.width,
+                      alignment: Alignment.center,
+                      child: RichText(
+                          text: TextSpan(
+                              text: 'you do not have account?!',
+                              style: textStyleNormal,
+                              children: [
+                            TextSpan(
+                              text: ' Register',
+                              style: textStyleNormal.copyWith(
+                                  color: accentColor,
+                                  decoration: TextDecoration.underline),
+                            )
+                          ])),
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
         ),
@@ -75,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _imageHeader(Size size) {
+  Widget _imageHeader(Size size, BuildContext context) {
     return Stack(
       children: [
         Image.asset(
@@ -84,14 +100,22 @@ class _LoginScreenState extends State<LoginScreen> {
           height: size.height * 0.33,
           fit: BoxFit.fitHeight,
         ),
-        widget.hasPreviousPage ? IconButton(onPressed: () {
-          Navigator.pop(context);
-        }, icon: Icon(Icons.arrow_back, size: 30,)) : SizedBox()
+        hasPreviousPage
+            ? IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: const Icon(
+                  Icons.arrow_back,
+                  size: 30,
+                ))
+            : const SizedBox()
       ],
     );
   }
 
-  Widget _loginForm(Size size) {
+  Widget _loginForm(
+      Size size, LoginProvider loginProvider, BuildContext context) {
     return Form(
         key: formGlobalKey,
         child: Column(
@@ -102,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 size: size,
                 hint: 'Email',
                 iconData: Icons.email_outlined),
-            SizedBox(
+            const SizedBox(
               height: AppConfig.largeDimensions,
             ),
             TextFieldWidget(
@@ -110,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 size: size,
                 hint: 'Password',
                 iconData: Icons.lock_open_outlined),
-            SizedBox(
+            const SizedBox(
               height: AppConfig.mediumDimensions,
             ),
             TextButton(
@@ -120,39 +144,81 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: textStyleNormal.copyWith(
                       decoration: TextDecoration.underline),
                 )),
-            SizedBox(
+            const SizedBox(
               height: AppConfig.largeDimensions,
             ),
 
-            GlobalButton(backgroundBtnColor:primaryColor,
-              btnTextColor: accentColor,
-              buttonText: 'Login',
-              onPressed: () {
-                login();
-              },),
+            loginProvider.state == LoginState.loading
+                ? const Center(child: CircularProgressIndicator())
+                : GlobalButton(
+                    backgroundBtnColor: primaryColor,
+                    btnTextColor: accentColor,
+                    buttonText: 'Login',
+                    onPressed: () {
+                       login(loginProvider,context);
+                    },
+                  ),
 
-            SizedBox(
+            // FutureBuilder(
+            //   future: loginResponse,
+            //     builder: (BuildContext context,
+            //     AsyncSnapshot<LoginModel>snapshot) {
+            //   switch (snapshot.connectionState) {
+            //     case ConnectionState.waiting:
+            //       {
+            //         return const CircularProgressIndicator();
+            //       }
+            //     default:
+            //         if (snapshot.hasError) {
+            //           WidgetsBinding.instance!
+            //               .addPostFrameCallback((_) {
+            //             //valueNotifier.value = _pcm; //provider
+            //             //setState
+            //             showInSnackBar(scaffoldKey,
+            //                 snapshot.error.toString(), true);
+            //           });
+            //           return Center(
+            //               child: Text('Error: ${snapshot.error}'));
+            //
+            //       } else{
+            //
+            //          return  GlobalButton(backgroundBtnColor: primaryColor,
+            //            btnTextColor: accentColor,
+            //            buttonText: 'Login',
+            //            onPressed: () {
+            //              login();
+            //            },);
+            //        }
+            //   }
+            // }),
+
+            const SizedBox(
               height: AppConfig.largeDimensions,
             ),
 
-            GlobalButton(backgroundBtnColor: Colors.white,
+            GlobalButton(
+              backgroundBtnColor: Colors.white,
               btnTextColor: primaryColor,
               buttonText: 'As Guest',
-              onPressed: (){
-                Navigator.pushAndRemoveUntil(context,
-                    MaterialPageRoute(builder: (_) => DashboardScreen()), (
-                        route) => false);
-              },)
+              onPressed: () {
+                Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (_) => const DashboardScreen()),
+                    (route) => false);
+              },
+            )
           ],
         ));
   }
 
-  login() {
+  login(LoginProvider provider,BuildContext context) {
 
     if (formGlobalKey.currentState!.validate()) {
-      // todo login
+      provider.login(emailController.text, passwordController.text,context);
+
     } else {
-      // todo invalid inputs
+      showInSnackBar(scaffoldKey, 'Please Enter a valid data', true);
     }
+
   }
 }

@@ -22,7 +22,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   int currentSelected = 0;
   @override
+  void initState() {
+    // TODO: implement initState
+    isLogin.$ = false; 
+    isLogin.save();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+
+    print('is login :::${userData.$}');
     Size size = MediaQuery.of(context).size;
     return Scaffold(
         appBar: AppBar(

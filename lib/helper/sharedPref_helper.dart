@@ -1,4 +1,5 @@
 import 'package:ecommerce_flutter/consts/app_strings.dart';
+import 'package:ecommerce_flutter/models/auth/login_model.dart';
 import 'package:shared_value/shared_value.dart';
 
 final SharedValue<bool> isLogin =
@@ -9,3 +10,7 @@ final SharedValue<String> localLanguage =
 
 final SharedValue<bool> isFirstTime =
     SharedValue(key: 'is_first_time',value: true, autosave: true );
+final SharedValue<User> userData =
+    SharedValue(value: User(),key: 'user_data',autosave: true);
+final SharedValue<String> userToken =
+    SharedValue(value: '',key: 'user_token',autosave: true);
